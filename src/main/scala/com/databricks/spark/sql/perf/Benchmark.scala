@@ -374,11 +374,12 @@ object Benchmark {
           }
           currentConfig = currentOptions.map { case (k,v) => s"$k: $v" }.mkString(", ")
 
-          logMessage(s"Sleep 3s")
-          Thread.sleep(3000)
           val res = executionsToRun.flatMap { q =>
             val setup = s"iteration: $i, ${currentOptions.map { case (k, v) => s"$k=$v"}.mkString(", ")}"
             logMessage(s"Running execution ${q.name} $setup")
+            
+            logMessage(s"Sleep 3s")
+            Thread.sleep(3000)
 
             currentExecution = q.name
             currentPlan = q match {
