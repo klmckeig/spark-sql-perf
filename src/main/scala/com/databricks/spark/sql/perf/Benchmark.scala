@@ -380,6 +380,7 @@ object Benchmark {
             
             logMessage(s"Sleep 3s")
             Thread.sleep(3000)
+            logMessage(s"Sleep completed")
 
             currentExecution = q.name
             currentPlan = q match {
