@@ -374,6 +374,8 @@ object Benchmark {
           }
           currentConfig = currentOptions.map { case (k,v) => s"$k: $v" }.mkString(", ")
 
+          logMessage(s"Sleep 3s")
+          Thread.sleep(3000)
           val res = executionsToRun.flatMap { q =>
             val setup = s"iteration: $i, ${currentOptions.map { case (k, v) => s"$k=$v"}.mkString(", ")}"
             logMessage(s"Running execution ${q.name} $setup")
@@ -403,7 +405,7 @@ object Benchmark {
                   logMessage(s"Execution '${q.name}' failed: ${f.message}")
                 }
                 singleResult.executionTime.foreach { time =>
-                  logMessage(s"Execution time: ${time / 1000}s")
+                  logMessage(s"Execution time: ${time / 1000}s")                  
                 }
                 currentResults += singleResult
                 singleResult :: Nil
