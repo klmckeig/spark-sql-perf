@@ -16,6 +16,7 @@
 
 package com.databricks.spark.sql.perf
 
+import sys.process._
 import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
@@ -377,10 +378,19 @@ object Benchmark {
           val res = executionsToRun.flatMap { q =>
             val setup = s"iteration: $i, ${currentOptions.map { case (k, v) => s"$k=$v"}.mkString(", ")}"
             logMessage(s"Running execution ${q.name} $setup")
-            
-            logMessage(s"Sleep 3s")
+
+
+            logMessage(s"Sleep 3 seconds")
             Thread.sleep(3000)
             logMessage(s"Sleep completed")
+
+            val queryNames = List( "q9", "q13", "q90" )
+            if(queryNames.contains(q.name)) {
+              logMessage(s"------------------------------------Starting perf command------------------------------------")
+              val startPerfCmdOut = "~/start-perf-command.sh" !!
+                logMessage(s"perf command started. $startPerfCmdOut")
+            }
+
 
             currentExecution = q.name
             currentPlan = q match {
@@ -416,6 +426,12 @@ object Benchmark {
                 logMessage(s"Execution '${q.name}' failed: ${e}")
                 Nil
             }
+            if (queryNames.contains(q.name)) {
+              logMessage(s"------------------------------------Starting perf command------------------------------------")
+              val startPerfCmdOut = "~/start-perf-command.sh" !!
+                logMessage(s"perf command started. $startPerfCmdOut")
+            }
+
           }
 
           val result = ExperimentRun(
