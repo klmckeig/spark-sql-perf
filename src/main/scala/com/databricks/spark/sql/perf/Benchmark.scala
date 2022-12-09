@@ -379,18 +379,21 @@ object Benchmark {
             val setup = s"iteration: $i, ${currentOptions.map { case (k, v) => s"$k=$v"}.mkString(", ")}"
             logMessage(s"Running execution ${q.name} $setup")
 
+            // logMessage(s"Sleep 3 seconds")
+            // Thread.sleep(3000)
+            // logMessage(s"Sleep completed")
 
-            logMessage(s"Sleep 3 seconds")
-            Thread.sleep(3000)
-            logMessage(s"Sleep completed")
-
+            // Declare which query to run the hook script
             val queryNames = List( "q9", "q13", "q90" )
-            if(queryNames.contains(q.name)) {
-              logMessage(s"------------------------------------Starting perf command------------------------------------")
-              val startPerfCmdOut = "~/start-perf-command.sh" !!
-                logMessage(s"perf command started. $startPerfCmdOut")
+            val currentQueryName = q.name.split("-")(0)
+            val startScript = s"/home/ubuntu/start-perf-command.sh"
+            val stopScript = s"/home/ubuntu/stop-perf-command.sh"
+            
+            if(queryNames.contains(currentQueryName)) {
+              logMessage(s"------------------------------------Starting perf command for ${currentQueryName} ------------------------------------")
+              val startPerfCmdOut = Process(s"bash ${startScript} ${currentQueryName}").lineStream
+              logMessage(s"${startPerfCmdOut}")
             }
-
 
             currentExecution = q.name
             currentPlan = q match {
@@ -410,6 +413,12 @@ object Benchmark {
                 forkThread=forkThread)
             }
 
+            if (queryNames.contains(currentQueryName)) {
+              logMessage(s"------------------------------------Stopping perf command for ${currentQueryName}------------------------------------")
+              val stopPerfCmdOut = Process(s"bash ${stopScript} ${currentQueryName}").lineStream
+              logMessage(s"${stopPerfCmdOut}")
+            }
+
             singleResultT match {
               case Success(singleResult) =>
                 singleResult.failure.foreach { f =>
@@ -426,12 +435,6 @@ object Benchmark {
                 logMessage(s"Execution '${q.name}' failed: ${e}")
                 Nil
             }
-            if (queryNames.contains(q.name)) {
-              logMessage(s"------------------------------------Starting perf command------------------------------------")
-              val startPerfCmdOut = "~/start-perf-command.sh" !!
-                logMessage(s"perf command started. $startPerfCmdOut")
-            }
-
           }
 
           val result = ExperimentRun(
